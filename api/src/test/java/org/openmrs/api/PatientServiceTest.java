@@ -9,19 +9,6 @@
  */
 package org.openmrs.api;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.openmrs.test.TestUtil.assertCollectionContentsEquals;
-import static org.openmrs.util.AddressMatcher.containsAddress;
-import static org.openmrs.util.NameMatcher.containsFullName;
 import org.apache.commons.collections.CollectionUtils;
 import org.junit.Assert;
 import org.junit.Before;
@@ -78,6 +65,20 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.openmrs.test.TestUtil.assertCollectionContentsEquals;
+import static org.openmrs.util.AddressMatcher.containsAddress;
+import static org.openmrs.util.NameMatcher.containsFullName;
 
 /**
  * This class tests methods in the PatientService class TODO Add methods to test all methods in
@@ -3321,6 +3322,31 @@ public class PatientServiceTest extends BaseContextSensitiveTest {
 		assertEquals(8, encounterService.getEncounter(57).getAllObs(true).size());
 		assertEquals(1, encounterService.getEncounter(57).getObsAtTopLevel(false).size());
 		assertEquals(2, encounterService.getEncounter(57).getObsAtTopLevel(true).size());
+	}
+
+	@Test
+	public void getPatientsByGivenName_shouldFetchPatientsByGivenName() throws Exception {
+		// note that this test is run again the data defined in standardTest-1.9.7-dataSet.xml
+		List<Patient> patients;
+
+		// there is one patient in standardTest-1.9.7-dataSet.xml with the given name "Horatio", and that patient has patient id #2
+		patients = patientService.getPatientsByGivenName("Horatio");
+		assertThat(patients.size(), is(1));
+		assertThat(patients.get(0).getPatientId(), is(2));
+
+		// there is one patient in standardTest-1.9.7-dataSet.xml with the family name "Hornblower", but this method should *not* return family name matches
+		patients = patientService.getPatientsByGivenName("Hornblower");
+		assertThat(patients.size(), is(0));
+		
+		// this method should *not* return patients with given names that are partial matches
+		patients = patientService.getPatientsByGivenName("Horat");
+		assertThat(patients.size(), is(0));
+
+		// this method *should* return patients if name only differs by letter casing
+		patients = patientService.getPatientsByGivenName("HORATIO");
+		assertThat(patients.size(), is(1));
+		assertThat(patients.get(0).getPatientId(), is(2));
+
 	}
 
 }
