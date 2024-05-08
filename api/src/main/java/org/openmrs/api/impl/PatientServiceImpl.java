@@ -1636,8 +1636,17 @@ public class PatientServiceImpl extends BaseOpenmrsService implements PatientSer
 	}
 
 	@Override
-	public List<Patient> getPatientsByGivenName(String name) {
-		// TODO: you should implement this method by using an underlying method provided by PatientDAO to fetch a list of patients, and then apply your own filtering logic
-		return null;
+	public List<Patient> getPatientsByGivenName(String name) {	
+
+		List<Patient> allPatients = dao.getAllPatients(true);
+
+		List<Patient> matchingPatients = new ArrayList<>();
+
+		for (Patient patient : allPatients) {
+			if (patient.getGivenName().equalsIgnoreCase(name)) {
+				matchingPatients.add(patient);
+			}
+		}
+		return matchingPatients;
 	}
 }
